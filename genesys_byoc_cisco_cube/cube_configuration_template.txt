@@ -1,3 +1,7 @@
+!! Genesys Cloud CX BYOC - CUBE Configuration Template by AJ Labs !!
+!! Developed and tested by Abdul on Cisco C8000V Azure VM Cisco IOS XE Software, Version 17.12.04 !!
+!! aj-labs.com !!
+
 !!License Configuration for vCUBE
 !
 license boot level network-premier addon dna-premier
