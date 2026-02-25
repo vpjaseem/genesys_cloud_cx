@@ -373,7 +373,7 @@ voice service voip
   pass-thru headers 14
 !
 ***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***---***
-!!GENESYS Tenant Settings
+!!GENESYS Tenant Settings. Replace sbc.domain.com with your own SBC's FQDN
 !
 voice class tenant 1
   handle-replaces
@@ -409,9 +409,10 @@ voice class tenant 2
 
 dial-peer voice 1 voip
  description INBOUND-FROM-GENESYS
- session protocol sipv2
- destination dpg 2
  incoming called e164-pattern-map 2
+ destination dpg 2
+ 
+ session protocol sipv2
  voice-class codec 1  
  voice-class sip tenant 1
  voice-class sip options-keepalive
@@ -421,9 +422,10 @@ dial-peer voice 1 voip
 !
 dial-peer voice 2 voip
  description OUTGOING-TO-TWILIO
- destination e164-pattern-map 2
- session protocol sipv2
+ !destination e164-pattern-map 2
  session target dns:aj-tw03.pstn.twilio.com
+
+ session protocol sipv2
  voice-class codec 1 
  voice-class sip tenant 2 
  voice-class sip options-keepalive
@@ -432,9 +434,10 @@ dial-peer voice 2 voip
 !
 dial-peer voice 3 voip
  description INCOMING-FROM-TWILIO
- session protocol sipv2
- destination dpg 4
  incoming called e164-pattern-map 1
+ destination dpg 4
+
+ session protocol sipv2
  voice-class codec 1 
  voice-class sip tenant 2
  voice-class sip options-keepalive
@@ -443,9 +446,10 @@ dial-peer voice 3 voip
 !
 dial-peer voice 4 voip
  description OUTBOUND-TO-GENESYS
- session protocol sipv2
- session target dns:aj-genesys-cube.byoc.usw2.pure.cloud
  destination e164-pattern-map 1
+ session target dns:aj-genesys-cu.byoc.usw2.pure.cloud
+ 
+ session protocol sipv2
  voice-class codec 1  
  voice-class sip tenant 1
  voice-class sip options-keepalive profile 15
