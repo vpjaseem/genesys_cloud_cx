@@ -274,7 +274,7 @@ voice class sip-profiles 11
  rule 350 request ANY sdp-header Audio-Attribute modify "a=candidate:1 2(.*) CUBE_PRIVATE_IP (.*)" "a=candidate:1 2\1 CUBE_EXTERNAL_NAT_PUBLIC_IP \2" 
 !
 
-!! SIP Profiles Manipulation From Genesys.
+!! SIP Profiles Manipulation From Genesys. CUBE_EXTERNAL_NAT_PUBLIC_IP with Public IP, CUBE_PRIVATE_IP with Private IP
 !
 voice class sip-profiles 12
  rule 10 request REFER sip-header From copy "@(.*com)" u05 
