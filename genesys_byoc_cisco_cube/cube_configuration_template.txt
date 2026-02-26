@@ -20,7 +20,7 @@ Destination filename [running-config]? base-config-backup
 
 !! Adding Name Server, Domain Name and NTP Server !!
 !
-ip name-server 208.67.222.222 208.67.220.220 8.8.8.8
+ip name-server 8.8.8.8 1.1.1.1
 ip domain name aj-collab.com
 ntp server 216.239.35.8
 !
