@@ -1,0 +1,402 @@
+!! This is the filtered configuration of AJ Labs Cisco C8000V Azure VM Cisco IOS XE Software, Version 17.12.04 with below configuration parameters !!
+!! CUBE_PRIVATE_IP = 172.21.1.5 !!
+!! CUBE_EXTERNAL_NAT_PUBLIC_IP = 52.190.252.54 !!
+!! sbc.domain.com = cube-sbc.aj-collab.com !!
+!! PSTN Termination URI = aj-tw03.pstn.twilio.com !!
+!! Genesys BYOC Trunk URI = aj-genesys-cu.byoc.usw2.pure.cloud !!
+
+!
+license boot level network-premier addon dna-premier
+do write
+exit
+reload
+!
+
+!
+copy running-config flash:
+base-config-backup
+!
+
+!
+ip name-server 8.8.8.8 1.1.1.1
+ip domain name aj-collab.com
+ntp server 216.239.35.8
+!
+
+!
+crypto key zeroize rsa
+crypto key generate rsa general-keys label SBC-RSA-KEY modulus 2048 exportable
+ip ssh rsa keypair-name SBC-RSA-KEY
+!
+
+!
+crypto pki trustpoint SBC-CERT-STORE
+ enrollment terminal
+ fqdn cube-sbc.aj-collab.com 
+ subject-name cn=cube-sbc.aj-collab.com,OU=Collab,O=AJ Labs
+ subject-alt-name cube-sbc.aj-collab.com
+ serial-number none
+ ip-address none
+ revocation-check none
+ rsakeypair SBC-RSA-KEY
+!
+
+!
+crypto pki enroll SBC-CERT-STORE
+!
+!! Get the certificate using above CSR !!
+
+!
+crypto pki authenticate SBC-CERT-STORE
+!
+!! Paste the Root/Intermediiate Certificate Bundles !!
+
+!
+crypto pki import SBC-CERT-STORE certificate
+!
+!! Paste the Identity Certificate !!
+
+!
+sip-ua 
+crypto signaling default trustpoint SBC-CERT-STORE
+!
+
+!! Below HTTP Secure Server is optional !!
+!
+ip http authentication local
+ip http secure-server
+ip http secure-trustpoint SBC-CERT-STORE
+!no ip http server
+!
+
+!! Download Certificates from here - https://help.genesys.cloud/articles/tls-trunk-transport-protocol-specification/ > Certificate trust > Legacy Cloud Voice platform > download the PEM certificates !!
+!
+crypto pki trustpoint GENESYS_DigiCertHighAssuranceEVRootCA
+enrollment terminal
+revocation-check none
+!
+crypto pki authenticate GENESYS_DigiCertHighAssuranceEVRootCA
+!
+!! Paste the DigiCertHighAssuranceEVRootCA
+
+!
+crypto pki trustpoint GENESYS_DigiCertGlobalRootG2
+enrollment terminal
+revocation-check none
+!
+crypto pki authenticate GENESYS_DigiCertGlobalRootG2
+!
+!! Paste the DigiCertGlobalRootG2
+
+crypto pki trustpoint GENESYS_DigiCertGlobalRootG3
+enrollment terminal
+revocation-check none
+!
+crypto pki authenticate GENESYS_DigiCertGlobalRootG3
+!
+!! Paste the DigiCertGlobalRootG3
+
+
+!! Download Certificate from here https://www.twilio.com/docs/sip-trunking#rootca !!
+!
+crypto pki trustpoint TWILIO_CA
+enrollment terminal
+revocation-check none
+!
+crypto pki authenticate TWILIO_CA
+!
+!! Paste the Twilio Certificate
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+voice service voip
+ ip address trusted list
+  ipv4 3.129.185.96  !Genesys cloud services. IPs are available here https://help.genesys.cloud/articles/byoc-cloud-public-sip-ip-addresses/
+  ipv4 3.136.43.147
+  ipv4 3.141.75.31
+  ipv4 3.141.75.31
+  ipv4 52.203.12.137
+  ipv4 54.82.241.192
+  ipv4 54.82.241.68
+  ipv4 54.82.188.43
+  ipv4 34.211.206.63
+  ipv4 54.244.22.120
+  ipv4 52.32.193.99
+  ipv4 52.33.193.56
+  ipv4 99.79.151.210
+  ipv4 35.182.29.150
+  ipv4 52.60.140.216
+  ipv4 35.182.138.230 
+  ipv4 18.229.62.233
+  ipv4 177.71.170.155
+  ipv4 18.229.17.171
+  ipv4 54.207.115.206
+  ipv4 52.212.65.21
+  ipv4 52.212.66.56
+  ipv4 52.212.61.62
+  ipv4 52.212.54.249
+  ipv4 3.11.204.103
+  ipv4 3.11.208.50
+  ipv4 3.11.83.136
+  ipv4 3.11.48.81
+  ipv4 18.197.177.95
+  ipv4 52.28.196.118
+  ipv4 18.197.58.44
+  ipv4 18.184.11.49
+  ipv4 167.234.50.224
+  ipv4 167.234.50.225
+  ipv4 167.234.50.226
+  ipv4 167.234.50.227
+  ipv4 167.234.48.224
+  ipv4 167.234.48.225
+  ipv4 167.234.48.226
+  ipv4 167.234.48.227
+  ipv4 3.6.231.246
+  ipv4 65.1.45.119
+  ipv4 35.154.180.222
+  ipv4 15.207.180.196
+  ipv4 13.54.135.179
+  ipv4 13.55.102.9
+  ipv4 13.55.146.155
+  ipv4 13.55.130.108
+  ipv4 13.115.13.21
+  ipv4 54.199.104.0
+  ipv4 13.112.90.55
+  ipv4 13.231.7.149
+  ipv4 52.79.48.237
+  ipv4 52.79.67.164
+  ipv4 52.78.39.100
+  ipv4 15.165.109.145
+  ipv4 167.234.49.224
+  ipv4 167.234.49.225
+  ipv4 167.234.49.226 
+  ipv4 167.234.49.227
+
+  ipv4 54.172.60.0 255.255.255.252 !Twilio Service Provider IPs. IPs are available here https://www.twilio.com/docs/sip-trunking/ip-addresses
+  ipv4 54.244.51.0 255.255.255.252
+  ipv4 54.171.127.192 255.255.255.252
+  ipv4 35.156.191.128 255.255.255.252
+  ipv4 54.65.63.192 255.255.255.252
+  ipv4 54.169.127.128 255.255.255.252
+  ipv4 54.252.254.64 255.255.255.252
+  ipv4 177.71.206.192 255.255.255.252
+  
+ rtcp keepalive
+ rtp-port range 16384 32766
+ address-hiding
+ mode border-element
+ allow-connections sip to sip
+ no supplementary-service sip refer
+ supplementary-service media-renegotiate
+ fax protocol t38 version 0 ls-redundancy 0 hs-redundancy 0 fallback none
+ trace
+ sip
+  session refresh
+  header-passing
+  error-passthru
+  !srtp-auth sha1-80
+  !pass-thru headers 12
+  sip-profiles inbound
+!
+sip-ua 
+ nat symmetric check-media-src
+ no remote-party-id
+ retry invite 2
+ connection-reuse
+ crypto signaling default trustpoint SBC-CERT-STORE    
+ handle-replaces
+!
+
+!
+voice class sip-profiles 11
+ rule 10 request ANY sip-header Contact modify "@.*:" "@cube-sbc.aj-collab.com:" 
+ rule 20 response ANY sip-header Contact modify "@.*:" "@cube-sbc.aj-collab.com:" 
+ rule 30 request ANY sip-header SIP-Req-URI modify "sip:(.*):5061 (.*)" "sip:\1:5061;user=phone \2" 
+ rule 40 request ANY sip-header User-Agent modify "(IOS.*)" "\1\x0D\x0AX-MS-SBC: Cisco UBE/ISR4321/\1" 
+ rule 50 response ANY sip-header Server modify "(IOS.*)" "\1\x0D\x0AX-MS-SBC: Cisco UBE/ISR4321/\1" 
+ rule 60 request ANY sdp-header Audio-Attribute modify "a=sendonly" "a=inactive" 
+ rule 70 response 200 sdp-header Audio-Connection-Info modify "0.0.0.0" "52.190.252.54" 
+ 
+ rule 71 response ANY sdp-header Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ rule 72 response ANY sdp-header Audio-Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ 
+ rule 73 request ANY sdp-header Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ rule 74 request ANY sdp-header Audio-Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ rule 80 request ANY sdp-header Audio-Attribute modify "(a=crypto:.*inline:[A-Za-z0-9+/=]+)" "\1|2^31" 
+ rule 90 response ANY sdp-header Audio-Attribute modify "(a=crypto:.*inline:[A-Za-z0-9+/=]+)" "\1|2^31" 
+ rule 100 request ANY sdp-header Audio-Attribute modify "a=candidate.*" "a=label:main-audio" 
+ rule 110 response ANY sdp-header Audio-Attribute modify "a=candidate.*" "a=label:main-audio" 
+ rule 120 response 486 sip-header Reason modify "cause=34;" "cause=17;" 
+ rule 300 response ANY sdp-header Audio-Attribute modify "a=rtcp:(.*) IN IP4 172.21.1.5" "a=rtcp:\1 IN IP4 52.190.252.54" 
+ rule 310 request ANY sdp-header Audio-Attribute modify "a=rtcp:(.*) IN IP4 172.21.1.5" "a=rtcp:\1 IN IP4 52.190.252.54" 
+ rule 320 response ANY sdp-header Audio-Attribute modify "a=candidate:1 1(.*) 172.21.1.5 (.*)" "a=candidate:1 1\1 52.190.252.54 \2" 
+ rule 330 request ANY sdp-header Audio-Attribute modify "a=candidate:1 1(.*) 172.21.1.5 (.*)" "a=candidate:1 1\1 52.190.252.54 \2" 
+ rule 340 response ANY sdp-header Audio-Attribute modify "a=candidate:1 2(.*) 172.21.1.5 (.*)" "a=candidate:1 2\1 52.190.252.54 \2" 
+ rule 350 request ANY sdp-header Audio-Attribute modify "a=candidate:1 2(.*) 172.21.1.5 (.*)" "a=candidate:1 2\1 52.190.252.54 \2" 
+ rule 360 request ANY sip-header Via modify "172.21.1.5" "cube-sbc.aj-collab.com"
+!
+voice class sip-profiles 12
+ rule 10 request REFER sip-header From copy "@(.*com)" u05 
+ rule 15 request REFER sip-header From copy "sip:(sip.*com)" u05 
+ rule 20 request REFER sip-header Refer-To modify "sip:\+(.*)@.*:5061" "sip:+AAA\1@\u05:5061" 
+ rule 30 request REFER sip-header Refer-To modify "<sip:sip.*:5061" "<sip:+AAA@\u05:5061" 
+ rule 40 response ANY sip-header Server modify "(IOS.*)" "\1\x0D\x0AX-MS-SBC: Cisco UBE/ISR4321/\1" 
+ rule 50 request ANY sdp-header Audio-Attribute modify "a=ice-.*" "a=label:main-audio" 
+ rule 60 request ANY sdp-header Attribute modify "a=ice-.*" "a=label:main-audio" 
+ rule 70 response ANY sdp-header Audio-Attribute modify "IN IP4 52.190.252.54" "IN IP4 172.21.1.5" 
+ rule 80 request ANY sdp-header Connection-Info modify "IN IP4 52.190.252.54" "IN IP4 172.21.1.5" 
+ rule 90 response ANY sdp-header Audio-Attribute modify "IN IP4 52.190.252.54" "IN IP4 172.21.1.5" 
+ rule 100 response ANY sdp-header Connection-Info modify "IN IP4 52.190.252.54" "IN IP4 172.21.1.5" 
+ rule 110 request ANY sdp-header mline-index 1 c= modify "IN IP4 52.190.252.54" "IN IP4 172.21.1.5" 
+ rule 120 response ANY sdp-header mline-index 1 c= modify "IN IP4 52.190.252.54" "IN IP4 172.21.1.5" 
+ rule 130 request ANY sdp-header Audio-Attribute modify "a=candidate:1 1 (.*) 52.190.252.54" "a=candidate:1 1 \1 172.21.1.5" 
+ rule 140 request ANY sdp-header Audio-Attribute modify "a=candidate:1 2 (.*) 52.190.252.54" "a=candidate:1 2 \1 172.21.1.5" 
+ rule 150 response ANY sdp-header Audio-Attribute modify "a=candidate:1 1 (.*) 52.190.252.54" "a=candidate:1 1 \1 172.21.1.5" 
+ rule 160 response ANY sdp-header Audio-Attribute modify "a=candidate:1 2 (.*) 52.190.252.54" "a=candidate:1 2 \1 172.21.1.5" 
+ rule 170 request ANY sdp-header Audio-Attribute modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+!
+voice class sip-hdr-passthrulist 14
+ passthru-hdr Referred-By
+!
+voice class sip-profiles 13
+ rule 9 request ANY sip-header Via modify "SIP(.*) 172.21.1.5(.*)" "SIP\1 52.190.252.54\2" 
+ rule 10 request OPTIONS sip-header From modify "<sip:172.21.1.5" "<sip:cube-sbc.aj-collab.com" 
+ rule 20 request OPTIONS sip-header Contact modify "<sip:172.21.1.5" "<sip:cube-sbc.aj-collab.com" 
+ rule 30 request OPTIONS sip-header User-Agent modify "(IOS.*)" "\1\x0D\x0AX-MS-SBC: Cisco UBE/ISR4321/\1" 
+ rule 40 response ANY sdp-header Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ rule 50 response ANY sdp-header Audio-Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+!
+voice class sip-options-keepalive 15
+ transport tcp tls
+ sip-profiles 13
+!
+voice class sip-profiles 21
+ request REINVITE sip-header From modify "(<.*:.*)(@.*>)" "\1@aj-tw03.pstn.twilio.com>"
+ request CANCEL sip-header From modify "(<.*:.*)(@.*>)" "\1@aj-tw03.pstn.twilio.com>"
+ request INVITE sip-header To modify "(<.*:.*)(@.*>)" "\1@aj-tw03.pstn.twilio.com>"
+ request REINVITE sip-header To modify "(<.*:.*)(@.*>)" "\1@aj-tw03.pstn.twilio.com>"
+ request INVITE sip-header From modify "(<.*:.*)(@.*>)" "\1@aj-tw03.pstn.twilio.com;user=phone>"
+ request INVITE sip-header P-Asserted-Identity modify "(<.*:.*)(@.*>)" "\1@aj-tw03.pstn.twilio.com;user=phone>"
+ 
+ request ANY sip-header Contact modify "@.*:" "@cube-sbc.aj-collab.com:" 
+ response ANY sip-header Contact modify "@.*:" "@cube-sbc.aj-collab.com:"
+ 
+ response ANY sdp-header Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ response ANY sdp-header Audio-Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ request ANY sdp-header Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54" 
+ request ANY sdp-header Audio-Connection-Info modify "IN IP4 172.21.1.5" "IN IP4 52.190.252.54"
+!
+
+!
+voice class codec 1
+ codec preference 1 g711ulaw
+ codec preference 2 g711alaw
+ codec preference 3 g729r8
+ codec preference 4 g729br8
+!
+voice class e164-pattern-map 1
+  description GENESYS DID NUMBERS PURCHASED FROM CARRIER
+  e164 +12146438413
+!
+voice class e164-pattern-map 2
+  description EXTERNAL PSTN NUMBERS
+  e164 +.T
+  e164 .T
+!
+voice class dpg 2
+ description GENESYS TO PSTN
+ !dial-peer 2 preference 1 !Need to add this command after configuring dial-peers
+!
+voice class dpg 4
+ description PSTN TO GENESYS
+ !dial-peer 4 preference 1 !Need to add this command after configuring dial-peers
+!
+voice class srtp-crypto 1
+ crypto 1 AES_CM_128_HMAC_SHA1_80
+!
+voice service voip
+ sip
+  pass-thru headers 14
+!
+voice class tenant 1
+  handle-replaces
+  localhost dns:cube-sbc.aj-collab.com
+  no referto-passing
+  bind control source-interface GigabitEthernet1
+  bind media source-interface GigabitEthernet1
+  pass-thru headers 14
+  no pass-thru content custom-sdp
+  sip-profiles 11
+  sip-profiles 12 inbound
+  early-offer forced
+  block 183 sdp present
+  srtp-crypto 1
+  session transport tcp tls
+!
+voice class tenant 2
+  bind control source-interface GigabitEthernet1
+  bind media source-interface GigabitEthernet1
+  sip-profiles 21
+  early-offer forced
+  asserted-id pai
+  options-ping
+  srtp-crypto 1
+  session transport tcp tls
+!
+dial-peer voice 1 voip
+ description INBOUND-FROM-GENESYS
+ incoming called e164-pattern-map 2
+ destination dpg 2
+ 
+ session protocol sipv2
+ voice-class codec 1  
+ voice-class sip tenant 1
+ voice-class sip options-keepalive
+ dtmf-relay rtp-nte
+ srtp
+ no vad
+!
+dial-peer voice 2 voip
+ description OUTGOING-TO-TWILIO
+ destination-pattern BAD.BAD
+ session target dns:aj-tw03.pstn.twilio.com
+
+ session protocol sipv2
+ voice-class codec 1 
+ voice-class sip tenant 2 
+ voice-class sip options-keepalive
+ dtmf-relay rtp-nte
+ srtp
+!
+dial-peer voice 3 voip
+ description INCOMING-FROM-TWILIO
+ incoming called e164-pattern-map 1
+ destination dpg 4
+
+ session protocol sipv2
+ voice-class codec 1 
+ voice-class sip tenant 2
+ voice-class sip options-keepalive
+ dtmf-relay rtp-nte
+ srtp
+!
+dial-peer voice 4 voip
+ description OUTBOUND-TO-GENESYS
+ destination-pattern BAD.BAD
+ session target dns:aj-genesys-cu.byoc.usw2.pure.cloud
+ 
+ session protocol sipv2
+ voice-class codec 1  
+ voice-class sip tenant 1
+ voice-class sip options-keepalive profile 15
+ dtmf-relay rtp-nte
+ srtp
+ fax protocol none
+ no vad
+!
+voice class dpg 2
+ dial-peer 2 preference 1
+!
+voice class dpg 4
+ dial-peer 4 preference 1
+!
