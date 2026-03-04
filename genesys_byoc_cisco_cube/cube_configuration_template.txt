@@ -276,6 +276,7 @@ voice class sip-profiles 11
  rule 330 request ANY sdp-header Audio-Attribute modify "a=candidate:1 1(.*) CUBE_PRIVATE_IP (.*)" "a=candidate:1 1\1 CUBE_EXTERNAL_NAT_PUBLIC_IP \2" 
  rule 340 response ANY sdp-header Audio-Attribute modify "a=candidate:1 2(.*) CUBE_PRIVATE_IP (.*)" "a=candidate:1 2\1 CUBE_EXTERNAL_NAT_PUBLIC_IP \2" 
  rule 350 request ANY sdp-header Audio-Attribute modify "a=candidate:1 2(.*) CUBE_PRIVATE_IP (.*)" "a=candidate:1 2\1 CUBE_EXTERNAL_NAT_PUBLIC_IP \2" 
+ rule 360 request ANY sip-header Via modify "CUBE_PRIVATE_IP" "sbc.domain.com"
 !
 
 !! SIP Profiles Manipulation From Genesys. CUBE_EXTERNAL_NAT_PUBLIC_IP with Public IP, CUBE_PRIVATE_IP with Private IP
@@ -426,7 +427,7 @@ dial-peer voice 1 voip
 !
 dial-peer voice 2 voip
  description OUTGOING-TO-TWILIO
- !destination e164-pattern-map 2
+ destination-pattern BAD.BAD
  session target dns:aj-tw03.pstn.twilio.com
 
  session protocol sipv2
@@ -450,7 +451,7 @@ dial-peer voice 3 voip
 !
 dial-peer voice 4 voip
  description OUTBOUND-TO-GENESYS
- destination e164-pattern-map 1
+ destination-pattern BAD.BAD
  session target dns:aj-genesys-cu.byoc.usw2.pure.cloud
  
  session protocol sipv2
